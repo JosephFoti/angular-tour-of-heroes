@@ -18,14 +18,14 @@ export class HeroesComponent implements OnInit {
 
   */
 
-  selectedHero: Hero;
+  // selectedHero: Hero;
   heroes: Hero[];
 
   constructor(private heroService: HeroService) { }
 
-  onSelect(hero: Hero): void {
-    this.selectedHero = hero;
-  }
+  // onSelect(hero: Hero): void {
+  //   this.selectedHero = hero;
+  // }
 
   /* Synchronus data call
     getHeroes(): void {

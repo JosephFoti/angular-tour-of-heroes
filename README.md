@@ -1,27 +1,275 @@
-# AngularTourOfHeros
+## Angular notes
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.1.
+#### CLI
 
-## Development server
+  - new project | ng new [project name]
+  - run server* | ng serve
+  - generate elements
+    - _Generated elements come with bundles of component files and automatically link into the app module at the top level of ng_
+    - generate new component | ng generate component [component name]
+    - generate new service | ng generate service [service]
+    - generate new router | ng generate module app-routing --flat --module=app
+      - flat puts the file in src/app instead of its own folder.
+      - module=app tells the CLI to register it in the imports array of the AppModule.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+  * in project directory
 
-## Code scaffolding
+#### One-way binding
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+  - Handling parent child relationships
+    - render child in template by using its selector property and incorporating it as a tag
+    ```html
+      <my-kiddo></my-kiddo>
+    ```
+    - pass property by importing and implementing Input package to the child component. First import ...
 
-## Build
+    ```typescript
+    import { Component, OnInit, Input } from '@angular/core';
+    //                          ^^^^^
+    ```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+    - then add the import tag to the class. the first param is the name of the var to be passed in, followed by the custom type Hero
 
-## Running unit tests
+    ```typescript
+    export class example {
+      @Input() hero: Hero;
+      //...
+    }
+    ```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+    - pass the var in the parent template with a value
 
-## Running end-to-end tests
+    ```html
+    <app-example [var]="[value, can be var]"></app-example>
+    ```
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+#### Two-way binding
 
-## Further help
+  - Configuring ng to process and change data from the client, and render data from the code.
+  - must add FormsModule to app.module.ts, main controller for app.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+  ```typescript
+
+  import { FormsModule } from '@angular/forms';
+
+  // and add FormsModule to 'imports' in @NgModule
+
+  @NgModule({
+    declarations: [
+      AppComponent,
+      HeroesComponent
+    ],
+    imports: [
+      BrowserModule,
+      FormsModule // <-- here
+    ],
+    providers: [],
+    bootstrap: [AppComponent]
+  });
+
+  ```
+
+  ```html
+  <!-- template -->
+  <div>
+    <label>name:
+      <input [(ngModel)]="hero.name" placeholder="name">
+    </label>
+  </div>
+
+  ```
+
+#### ng Template Methods
+
+  - \*ngFor
+    - Loops through defined iterator from component module
+    - syntax | \*ngFor="[for loop statement]"
+      - e.g.
+      ```html
+      <element *ngFor="let item of array">
+        <h1>{{item.prop}}</h1>
+        <h3>{{item.prop2}}</h3>
+      </element>
+      ```
+
+  - \*ngIf
+    - Conditional working with component module
+    - syntax | \*ngIf="[conditional statement]"
+      - e.g.
+      ```html
+      <element *ngIf="variable === true">
+        <h1>Show me if condition is true</h1>
+      </element>
+      ```
+
+  - Class Binging
+    - Conditional class binder for a given class if a condition is met
+    - syntax | [class.[classname]]="[conditional statement]"
+      - e.g.
+      ```html
+      <element [class.selected]="clicked === true">
+        <h1>Parent receives class if condition is met</h1>
+      </element>
+      ```
+
+#### Services
+
+  - Used to provide and handle external data. Bound to constructor props.
+    - syntax
+    ```typescript
+    import { Injectable } from '@angular/core';
+    @Injectable({
+      providedIn: 'root'
+    })
+    export class ExampleService {
+
+      getData(): [type] {
+        // Process data
+        return data;
+      }
+
+    }
+
+    // ---- recieving in component ----
+
+    // imports ...
+    import { ExampleService } from '../example.service';
+
+    // class export ...
+
+    constructor([private || public] exampleService: ExampleService) { }
+    //          ^ private for vars scoped to constructor, public for vars scoped for linked template
+
+    getData(): void {
+      this.var = this.exampleService.getData();
+    }
+
+    ngOnInit() {
+      this.getData()
+    }
+    ```
+    - Above process describes a synchronus call. To make async use Observable
+
+#### Observables
+
+  - Additional library for handling asynchronus calls and promises. [docs](https://rxjs-dev.firebaseapp.com/).
+  - syntax
+  ```typescript
+  import { Injectable } from '@angular/core';
+  import { Observable, of } from 'rxjs';
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ExampleService {
+
+    getData(): Observable<type> {
+      // Process data
+      return of(data);
+    }
+
+  }
+
+  // ---- recieving in component ----
+
+  // imports ...
+  import { ExampleService } from '../example.service';
+
+  // class export ...
+
+  constructor([private || public] exampleService: ExampleService) { }
+  //          ^ private for vars scoped to constructor, public for vars scoped for linked template
+
+
+  getData(): void {
+    this.exampleService.getData()
+      .subscribe(data => this.var = data);
+  }
+
+  ngOnInit() {
+    this.getData();
+  }
+  ```
+
+#### Routes
+
+  - Routing in ng takes place in a separate component generated by a generate command
+    - _- generate new router | ng generate module app-routing --flat --module=app_
+  - Boilerplate adjustments
+
+    ```typescript
+
+    import { NgModule }             from '@angular/core';
+    import { RouterModule, Routes } from '@angular/router';
+
+    @NgModule({
+      exports: [ RouterModule ]
+    })
+    export class AppRoutingModule {}
+
+    ```
+
+    - adding routes takes place before the \@NgModule
+
+    ```typescript
+
+    import { NgModule }             from '@angular/core';
+    import { RouterModule, Routes } from '@angular/router';
+
+    import { ExampleComponent, UserAboutComponent} from './examples';
+
+    const routes: Routes = [
+      { path: 'path-string/:[with param optional]', component: [var component to be linked] }
+      // e.g.
+      { path: 'about/:user', component: UserAboutComponent }
+      // default
+      { path: '', redirectTo: '/home', pathMatch: 'full' },
+    ];
+
+    @NgModule({
+      exports: [ RouterModule ]
+    })
+    export class AppRoutingModule {}
+
+    ```
+
+    - links are rendered in respective components with keyword 'routerLink'.
+
+    ```html
+
+    <a routerLink="/detail/{{hero.id}}">
+      <span class="badge">{{hero.id}}</span> {{hero.name}}
+    </a>
+
+    ```
+
+  - Accessing URL parameters
+    - to access url params, add two additional ng components, and then add them to the constructor with a service.
+
+    ```typescript
+
+    import { ActivatedRoute } from '@angular/router';
+    import { Location } from '@angular/common';
+
+    constructor (
+      private route: ActivatedRoute,
+      private service: Service,
+      private location: Location
+    ) { }
+
+    ```
+
+    - call the param inside class
+
+    ```typescript
+    ngOnInit(): void {
+      this.getHero();
+    }
+
+    getHero(): void {
+      const id = +this.route.snapshot.paramMap.get('id');
+      this.heroService.getHero(id)
+        .subscribe(hero => this.hero = hero);
+    }
+
+    ```
